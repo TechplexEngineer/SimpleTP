@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.Sound;
@@ -24,17 +25,39 @@ import org.bukkit.plugin.java.JavaPlugin;
  *
  * @author techplex
  */
-public class SimpleTP extends JavaPlugin {
+public class Main extends JavaPlugin {
     public ArrayList<Warp> warps = new ArrayList();
 	public int last_config_warps_amount = 0;
 
+    @Override
 	public void onEnable() {
+        
+//        getCommand("warp").setExecutor(new WarpCMD());
+        
 		int index = 0;
 		while (this.getConfig().get("warppoint_" + index + "_name") != null) {
 			String n = (String)this.getConfig().get("warppoint_" + index + "_name");
 			String m = (String)this.getConfig().get("warppoint_" + index + "_message");
 			String l = (String)this.getConfig().get("warppoint_" + index + "_location");
-			int s = (Integer)this.getConfig().get("warppoint_" + index + "_sound");
+            boolean s = false;
+            boolean success = false;
+            
+            
+            try {
+                s = (boolean) this.getConfig().get("warppoint_" + index + "_sound");
+                success = true;
+            } catch (Exception ex) {}
+            if (!success) {
+                getLogger().info("Found an unconverted entry");
+                try {
+                    int a = (Integer)this.getConfig().get("warppoint_" + index + "_sound");
+                    s = (a == 1);
+                    success = true;
+                } catch (Exception ex) {}
+            }
+            
+            
+            
 			World w = this.getServer().getWorld(l.split("~")[5]);
 			if (w == null) {
 				w = Bukkit.getServer().createWorld(new WorldCreator(l.split("~")[5]));
@@ -56,6 +79,7 @@ public class SimpleTP extends JavaPlugin {
 		}
 	}
 
+    @Override
 	public void onDisable() {
 		int k = 0;
 		while (k != this.last_config_warps_amount + 1) {
@@ -108,14 +132,44 @@ public class SimpleTP extends JavaPlugin {
 		return null;
 	}
 
+    @Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        
+        if (args.length == 1) {
+            if (args[0].equalsIgnoreCase("list")) {
+                if (warps.isEmpty()) {
+                    sender.sendMessage(ChatColor.GREEN + "Sorry there are no warps.");
+                } else {
+                    sender.sendMessage(ChatColor.GREEN + "Here a list of all ("+warps.size()+") available warps:");
+                    warps.stream().forEach((w) -> {
+                        this.getPlayer(sender).sendMessage(ChatColor.GREEN + w.name);
+                    });
+                }
+                return true;
+            }
+        }
+        if (args.length == 2) {
+            if (!isPlayer(sender)) {
+                sender.sendMessage(ChatColor.RED+"Sorry you must be a player ingame to create a warp");
+                return false;
+            }
+            if (args[0].equalsIgnoreCase("create")) {
+                String warpName = args[1];
+                this.warps.add(new Warp(warpName, "", getPlayer(sender).getLocation(), false));
+                this.getPlayer(sender).sendMessage(ChatColor.GREEN + "Warp " + warpName + " added");
+                return true;
+            }
+        }
+        return false;
+        
+        /*
 		if (this.isPlayer(sender) && command.getName().equalsIgnoreCase("warp") && args.length > 0) {
 			if (args.length == 1 && this.isWarp(args[0])) {
 				this.getPlayer(sender).teleport(this.getWarpByName((String)args[0]).location);
 				if (!this.getWarpByName((String)args[0]).message.equals("")) {
 					this.getPlayer(sender).sendMessage(this.getWarpByName((String)args[0]).message);
 				}
-				if (this.getWarpByName((String)args[0]).sound == 1) {
+				if (this.getWarpByName((String)args[0]).sound) {
 					this.getPlayer(sender).getWorld().playSound(this.getPlayer(sender).getLocation(), Sound.PORTAL_TRAVEL, 100.0f, 100.0f);
 				}
 				return true;
@@ -125,7 +179,7 @@ public class SimpleTP extends JavaPlugin {
 				if (!this.getWarpByName((String)args[0]).message.equals("")) {
 					this.getServer().getPlayer(args[1]).sendMessage(this.getWarpByName((String)args[0]).message);
 				}
-				if (this.getWarpByName((String)args[0]).sound == 1) {
+				if (this.getWarpByName((String)args[0]).sound) {
 					this.getPlayer(sender).getWorld().playSound(this.getPlayer(sender).getLocation(), Sound.PORTAL_TRAVEL, 100.0f, 100.0f);
 				}
 				return true;
@@ -141,7 +195,7 @@ public class SimpleTP extends JavaPlugin {
 			return true;
 		}
 		if (this.isPlayer(sender) && command.getName().equalsIgnoreCase("createwarp") && args.length == 1 && !this.isWarp(args[0]) && this.getPlayer(sender).isOp()) {
-			this.warps.add(new Warp(args[0], "", this.getPlayer(sender).getLocation(), 0));
+			this.warps.add(new Warp(args[0], "", this.getPlayer(sender).getLocation(), false));
 			this.getPlayer(sender).sendMessage("\u00a72Warp " + args[0] + " added");
 			return true;
 		}
@@ -167,13 +221,13 @@ public class SimpleTP extends JavaPlugin {
 			return true;
 		}
 		if (this.isPlayer(sender) && command.getName().equalsIgnoreCase("warpsound") && args.length > 1 && this.isWarp(args[0]) && this.getPlayer(sender).isOp()) {
-			int s = 0;
+			boolean s = false;
 			if (args[1].equalsIgnoreCase("true")) {
-				s = 1;
+				s = true;
 				this.getPlayer(sender).sendMessage("\u00a72Sound of warp " + args[0] + " enabled!");
 			}
 			if (args[1].equalsIgnoreCase("false")) {
-				s = 0;
+				s = false;
 				this.getPlayer(sender).sendMessage("\u00a72Sound of warp " + args[0] + " disabled!");
 			}
 			this.getWarpByName((String)args[0]).sound = s;
@@ -258,5 +312,6 @@ public class SimpleTP extends JavaPlugin {
 			return true;
 		}
 		return false;
+    */
 	}
 }
