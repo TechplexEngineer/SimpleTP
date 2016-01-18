@@ -76,11 +76,8 @@ public class SimpleTP extends JavaPlugin {
 		this.saveConfig();
 	}
 
-	public boolean isCommandSenderAPlayer(CommandSender s) {
-		if (s instanceof Player) {
-			return true;
-		}
-		return false;
+	public boolean isPlayer(CommandSender s) {
+		return (s instanceof Player);
 	}
 
 	public Player getPlayer(CommandSender s) {
@@ -112,7 +109,7 @@ public class SimpleTP extends JavaPlugin {
 	}
 
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (this.isCommandSenderAPlayer(sender) && command.getName().equalsIgnoreCase("warp") && args.length > 0) {
+		if (this.isPlayer(sender) && command.getName().equalsIgnoreCase("warp") && args.length > 0) {
 			if (args.length == 1 && this.isWarp(args[0])) {
 				this.getPlayer(sender).teleport(this.getWarpByName((String)args[0]).location);
 				if (!this.getWarpByName((String)args[0]).message.equals("")) {
@@ -134,7 +131,7 @@ public class SimpleTP extends JavaPlugin {
 				return true;
 			}
 		}
-		if (this.isCommandSenderAPlayer(sender) && command.getName().equalsIgnoreCase("listwarps") && args.length == 0) {
+		if (this.isPlayer(sender) && command.getName().equalsIgnoreCase("listwarps") && args.length == 0) {
 			this.getPlayer(sender).sendMessage("\u00a72Here a list of all available warps:");
 			int k = 0;
 			while (k != this.warps.size()) {
@@ -143,17 +140,17 @@ public class SimpleTP extends JavaPlugin {
 			}
 			return true;
 		}
-		if (this.isCommandSenderAPlayer(sender) && command.getName().equalsIgnoreCase("createwarp") && args.length == 1 && !this.isWarp(args[0]) && this.getPlayer(sender).isOp()) {
+		if (this.isPlayer(sender) && command.getName().equalsIgnoreCase("createwarp") && args.length == 1 && !this.isWarp(args[0]) && this.getPlayer(sender).isOp()) {
 			this.warps.add(new Warp(args[0], "", this.getPlayer(sender).getLocation(), 0));
 			this.getPlayer(sender).sendMessage("\u00a72Warp " + args[0] + " added");
 			return true;
 		}
-		if (this.isCommandSenderAPlayer(sender) && command.getName().equalsIgnoreCase("deletewarp") && args.length == 1 && this.isWarp(args[0]) && this.getPlayer(sender).isOp()) {
+		if (this.isPlayer(sender) && command.getName().equalsIgnoreCase("deletewarp") && args.length == 1 && this.isWarp(args[0]) && this.getPlayer(sender).isOp()) {
 			this.warps.remove(this.getWarpByName(args[0]));
 			this.getPlayer(sender).sendMessage("\u00a72Warp " + args[0] + " deleted");
 			return true;
 		}
-		if (this.isCommandSenderAPlayer(sender) && command.getName().equalsIgnoreCase("warpmessage") && args.length > 1 && this.isWarp(args[0]) && this.getPlayer(sender).isOp()) {
+		if (this.isPlayer(sender) && command.getName().equalsIgnoreCase("warpmessage") && args.length > 1 && this.isWarp(args[0]) && this.getPlayer(sender).isOp()) {
 			String m = "";
 			int k = 1;
 			while (k != args.length) {
@@ -164,12 +161,12 @@ public class SimpleTP extends JavaPlugin {
 			this.getPlayer(sender).sendMessage("\u00a72Warp " + args[0] + "'s message set to " + m);
 			return true;
 		}
-		if (this.isCommandSenderAPlayer(sender) && command.getName().equalsIgnoreCase("deletewarpmessage") && args.length == 1 && this.isWarp(args[0]) && this.getPlayer(sender).isOp()) {
+		if (this.isPlayer(sender) && command.getName().equalsIgnoreCase("deletewarpmessage") && args.length == 1 && this.isWarp(args[0]) && this.getPlayer(sender).isOp()) {
 			this.getWarpByName((String)args[0]).message = "";
 			this.getPlayer(sender).sendMessage("\u00a72Warp " + args[0] + "'s message set to nothing");
 			return true;
 		}
-		if (this.isCommandSenderAPlayer(sender) && command.getName().equalsIgnoreCase("warpsound") && args.length > 1 && this.isWarp(args[0]) && this.getPlayer(sender).isOp()) {
+		if (this.isPlayer(sender) && command.getName().equalsIgnoreCase("warpsound") && args.length > 1 && this.isWarp(args[0]) && this.getPlayer(sender).isOp()) {
 			int s = 0;
 			if (args[1].equalsIgnoreCase("true")) {
 				s = 1;
@@ -182,7 +179,7 @@ public class SimpleTP extends JavaPlugin {
 			this.getWarpByName((String)args[0]).sound = s;
 			return true;
 		}
-		if (this.isCommandSenderAPlayer(sender) && command.getName().equalsIgnoreCase("tpall") && args.length == 0 && this.getPlayer(sender).isOp()) {
+		if (this.isPlayer(sender) && command.getName().equalsIgnoreCase("tpall") && args.length == 0 && this.getPlayer(sender).isOp()) {
             Collection<? extends Player> onlinePlayers = Bukkit.getServer().getOnlinePlayers();
             onlinePlayers.stream().forEach((p) -> {
                 if (p != this.getPlayer(sender)) {
@@ -191,7 +188,7 @@ public class SimpleTP extends JavaPlugin {
             });
 			return true;
 		}
-		if (this.isCommandSenderAPlayer(sender) && command.getName().equalsIgnoreCase("tpallusers") && args.length == 0 && this.getPlayer(sender).isOp()) {
+		if (this.isPlayer(sender) && command.getName().equalsIgnoreCase("tpallusers") && args.length == 0 && this.getPlayer(sender).isOp()) {
 			Collection<? extends Player> onlinePlayers = Bukkit.getServer().getOnlinePlayers();
             onlinePlayers.stream().forEach((p) -> {
                 if (p != this.getPlayer(sender) && !p.isOp()) {
@@ -200,7 +197,7 @@ public class SimpleTP extends JavaPlugin {
             });
 			return true;
 		}
-		if (this.isCommandSenderAPlayer(sender) && command.getName().equalsIgnoreCase("tpalladmins") && args.length == 0 && this.getPlayer(sender).isOp()) {
+		if (this.isPlayer(sender) && command.getName().equalsIgnoreCase("tpalladmins") && args.length == 0 && this.getPlayer(sender).isOp()) {
 			Collection<? extends Player> onlinePlayers = Bukkit.getServer().getOnlinePlayers();
             onlinePlayers.stream().forEach((p) -> {
                 if (p != this.getPlayer(sender) && p.isOp()) {
@@ -209,7 +206,7 @@ public class SimpleTP extends JavaPlugin {
             });
 			return true;
 		}
-		if (this.isCommandSenderAPlayer(sender) && command.getName().equalsIgnoreCase("sethome")) {
+		if (this.isPlayer(sender) && command.getName().equalsIgnoreCase("sethome")) {
 			if (this.getConfig().get("home_" + this.getPlayer(sender).getName() + "_world") == null) {
 				this.getConfig().set("home_" + this.getPlayer(sender).getName() + "_world", (Object)((World)this.getServer().getWorlds().get(0)).getName());
 				this.saveConfig();
@@ -222,7 +219,7 @@ public class SimpleTP extends JavaPlugin {
 			this.getPlayer(sender).sendMessage("\u00a72Your home has been set");
 			return true;
 		}
-		if (this.isCommandSenderAPlayer(sender) && command.getName().equalsIgnoreCase("home")) {
+		if (this.isPlayer(sender) && command.getName().equalsIgnoreCase("home")) {
 			if (this.getConfig().get("home_" + this.getPlayer(sender).getName() + "_world") == null) {
 				this.getConfig().set("home_" + this.getPlayer(sender).getName() + "_world", (Object)((World)this.getServer().getWorlds().get(0)).getName());
 				this.saveConfig();
@@ -243,7 +240,7 @@ public class SimpleTP extends JavaPlugin {
 			}
 			return true;
 		}
-		if (this.isCommandSenderAPlayer(sender) && command.getName().equalsIgnoreCase("deletehome")) {
+		if (this.isPlayer(sender) && command.getName().equalsIgnoreCase("deletehome")) {
 			if (this.getConfig().get("home_" + this.getPlayer(sender).getName() + "_world") == null) {
 				this.getConfig().set("home_" + this.getPlayer(sender).getName() + "_world", (Object)((World)this.getServer().getWorlds().get(0)).getName());
 				this.saveConfig();
