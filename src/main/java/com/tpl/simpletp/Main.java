@@ -48,7 +48,7 @@ public class Main extends JavaPlugin {
                 success = true;
             } catch (Exception ex) {}
             if (!success) {
-                getLogger().info("Found an unconverted entry");
+                getLogger().info(ChatColor.GOLD + "Found an unconverted entry");
                 try {
                     int a = (Integer)this.getConfig().get("warppoint_" + index + "_sound");
                     s = (a == 1);
@@ -135,6 +135,55 @@ public class Main extends JavaPlugin {
     @Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         
+        if (args.length >= 1) {
+            String warpName = args[0];
+            if (!isWarp(warpName)) {
+                sender.sendMessage(ChatColor.RED+"Sorry " + warpName + " is not a valid warp");
+                return false;
+            }
+            // /warp <warpName>
+            if (args.length == 1) {
+                if (!isPlayer(sender)) {
+                    sender.sendMessage(ChatColor.RED+"Sorry you must be a player ingame to warp");
+                    return false;
+                }
+                Warp warp = getWarpByName(warpName);
+                getPlayer(sender).teleport(warp.location);
+                
+                if (!warp.message.equals("")) {
+                    getPlayer(sender).sendMessage(warp.message);
+                }
+                if (warp.sound) {
+                    getPlayer(sender).getWorld().playSound(getPlayer(sender).getLocation(), Sound.PORTAL_TRAVEL, 100.0f, 100.0f);
+                }
+                return true;
+            }
+            // /warp <warpName> <playerName>
+            if (args.length == 3) {
+                String playerName = args[1];
+                Warp warp = getWarpByName(warpName);
+                if (getPlayer(sender).isOp()) {
+                    sender.sendMessage(ChatColor.RED+"sorry you must be an op to warp someone else");
+                    return false;
+                }
+                if (getServer().getPlayer(playerName) == null) {
+                    sender.sendMessage(ChatColor.RED+"sorry that player does not exist");
+                    return false;
+                }
+                
+                getServer().getPlayer(playerName).teleport(warp.location);
+                if (!warp.message.equals("")) {
+                    getServer().getPlayer(playerName).sendMessage(warp.message);
+                }
+                if (warp.sound) {
+                    getPlayer(sender).getWorld().playSound(getPlayer(sender).getLocation(), Sound.PORTAL_TRAVEL, 100.0f, 100.0f);
+                }
+                return true;
+            }
+
+            return true;
+        }
+        
         if (args.length == 1) {
             if (args[0].equalsIgnoreCase("list")) {
                 if (warps.isEmpty()) {
@@ -142,13 +191,14 @@ public class Main extends JavaPlugin {
                 } else {
                     sender.sendMessage(ChatColor.GREEN + "Here a list of all ("+warps.size()+") available warps:");
                     warps.stream().forEach((w) -> {
-                        this.getPlayer(sender).sendMessage(ChatColor.GREEN + w.name);
+                        sender.sendMessage(ChatColor.GREEN + w.name);
                     });
                 }
                 return true;
             }
         }
         if (args.length == 2) {
+            
             if (!isPlayer(sender)) {
                 sender.sendMessage(ChatColor.RED+"Sorry you must be a player ingame to create a warp");
                 return false;
