@@ -1,0 +1,43 @@
+name: SimpleTP
+main: com.tpl.simpletp.SimpleTP
+version: 1.0
+commands:
+   tpall:
+      description: Teleports everybody on the server to your position
+      usage: /tpall
+   warp:
+      description: Teleports another player to a warp point
+      usage: /warp [name] [player]
+   createwarp:
+      description: Creates a warp at your position
+      usage: /createwarp [name]
+   deletewarp:
+      description: Deletes a warp point
+      usage: /deletewarp [name]
+   warpmessage:
+      description: Sets a custom warp message
+      usage: /warpmessage [name] [message]
+   tpallusers:
+      description: Teleports all users on the server to you
+      usage: /tpallusers
+   tpalladmins:
+      description: Teleports all admins on the server to you
+      usage: /tpalladmins
+   home:
+      description: Teleports you to your home
+      usage: /home
+   sethome:
+      description: Sets your home
+      usage: /sethome
+   deletehome:
+      description: Deletes your home
+      usage: /deletehome
+   warpsound:
+      description: Enable or disable the warp's sound
+      usage: /warpsound [name] [true/false]
+   listwarps:
+      description: List all warps
+      usage: /listwarps
+   deletewarpmessage:
+      description: Delete the warp message
+      usage: /deletewarpmessage [name]
