@@ -27,13 +27,18 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author techplex
  */
 public class Main extends JavaPlugin {
+    
+    public static String PERM_BASE = "simpletp";
+    
     public ArrayList<Warp> warps = new ArrayList();
 	public int last_config_warps_amount = 0;
+    public static Main inst;
 
     @Override
 	public void onEnable() {
+        inst = this;
         
-//        getCommand("warp").setExecutor(new WarpCMD());
+        getCommand("warp").setExecutor(new WarpCMD());
         
 		int index = 0;
 		while (this.getConfig().get("warppoint_" + index + "_name") != null) {
@@ -99,152 +104,5 @@ public class Main extends JavaPlugin {
 			++k;
 		}
 		this.saveConfig();
-	}
-
-	public boolean isPlayer(CommandSender s) {
-		return (s instanceof Player);
-	}
-
-	public Player getPlayer(CommandSender s) {
-		return (Player)s;
-	}
-
-	public boolean isWarp(String name) {
-		int k = 0;
-		while (k != this.warps.size()) {
-			if (k >= this.warps.size()) break;
-			if (this.warps.get((int)k).name.equalsIgnoreCase(name)) {
-				return true;
-			}
-			++k;
-		}
-		return false;
-	}
-
-	public Warp getWarpByName(String name) {
-		int k = 0;
-		while (k != this.warps.size()) {
-			if (k >= this.warps.size()) break;
-			if (this.warps.get((int)k).name.equalsIgnoreCase(name)) {
-				return this.warps.get(k);
-			}
-			++k;
-		}
-		return null;
-	}
-
-    @Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        
-        if (args.length < 1) {
-            sender.sendMessage(ChatColor.RED+"Usage");
-            // print usage @todo
-            return false;
-        }
-        final String c = "list|create|all|op|users";
-        List<String> cmds = Arrays.asList(c.split("\\|"));
-        if (cmds.contains(args[0].toLowerCase())) {
-            String subcmd = args[0];
-            
-            // /warp list
-            if (subcmd.equalsIgnoreCase("list")) {
-                if (warps.isEmpty()) {
-                    sender.sendMessage(ChatColor.GREEN + "Sorry there are no warps.");
-                } else {
-                    sender.sendMessage(ChatColor.GREEN + "Here a list of all (" + warps.size() + ") available warps:");
-                    warps.stream().forEach((w) -> {
-                        sender.sendMessage(ChatColor.GREEN + w.name);
-                    });
-                }
-                return true;
-            }
-            
-            if (!isPlayer(sender)) {
-                sender.sendMessage(ChatColor.RED + "Sorry you must be a player ingame to do that.");
-                return false;
-            }
-            
-            // /warp create <warpName>
-            if (subcmd.equalsIgnoreCase("create")) {
-                if (!isPlayer(sender)) {
-                    sender.sendMessage(ChatColor.RED + "Sorry you must be a player ingame to create a warp");
-                    return false;
-                }
-                if (args.length < 2) {
-                    sender.sendMessage(ChatColor.RED + "Not enough arugments to command. Proper use: warp create <warpName>");
-                    return false;
-                }
-                String warpName = args[1];
-                if (cmds.contains(warpName.toLowerCase())) {
-                    sender.sendMessage(ChatColor.RED + "Sorry, you cannot create a warp named "+warpName+" because it would conflict with a command.");
-                    return false;
-                }
-                this.warps.add(new Warp(warpName, "", getPlayer(sender).getLocation(), false));
-                this.getPlayer(sender).sendMessage(ChatColor.GREEN + "Warp " + warpName + " added");
-                return true;
-                
-            }
-            
-            // /warp all
-            if (subcmd.equalsIgnoreCase("all")) {
-                Collection<? extends Player> onlinePlayers = Bukkit.getServer().getOnlinePlayers();
-                Player issuer = getPlayer(sender);
-                onlinePlayers.stream().forEach((p) -> {
-                    if (p != issuer) {
-                        p.teleport(issuer.getLocation());
-                    }
-                });
-                return true;
-            }
-            // /warp op
-            if (subcmd.equalsIgnoreCase("op")) {
-                Collection<? extends Player> onlinePlayers = Bukkit.getServer().getOnlinePlayers();
-                Player issuer = getPlayer(sender);
-                onlinePlayers.stream().forEach((p) -> {
-                    if (p != issuer && p.isOp()) {
-                        p.teleport(issuer.getLocation());
-                    }
-                });
-                return true;
-            }
-            // /warp users
-            if (subcmd.equalsIgnoreCase("users")) {
-                Collection<? extends Player> onlinePlayers = Bukkit.getServer().getOnlinePlayers();
-                Player issuer = getPlayer(sender);
-                onlinePlayers.stream().forEach((p) -> {
-                    if (p != issuer && !p.isOp()) {
-                        p.teleport(issuer.getLocation());
-                    }
-                });
-                return true;
-            }
-        } else if (isWarp(args[0])) {
-            if (!isPlayer(sender)) {
-                sender.sendMessage(ChatColor.RED + "Sorry you must be a player ingame to warp");
-                return false;
-            }
-            Warp warp = getWarpByName(args[0]);
-            getPlayer(sender).teleport(warp.location);
-
-            if (!warp.message.equals("")) {
-                getPlayer(sender).sendMessage(warp.message);
-            }
-            if (warp.sound) {
-                getPlayer(sender).getWorld().playSound(getPlayer(sender).getLocation(), Sound.PORTAL_TRAVEL, 100.0f, 100.0f);
-            }
-            return true;
-        
-        } else {
-            sender.sendMessage(ChatColor.RED+"Unknown action");
-            // print usage @todo
-            return false;
-        }
-        
-        return false;
-      
-	}
-
-    private void elseif() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+	}   
 }
